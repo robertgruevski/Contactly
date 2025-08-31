@@ -9,14 +9,14 @@ namespace Contactly.Controllers
 	[ApiController]
 	public class ContactsController : ControllerBase
 	{
-		private readonly ContactlyDbContext _dbContext;
+		private readonly ContactlyDbContext dbContext;
 		public ContactsController(ContactlyDbContext dbContext)
 		{
-			this._dbContext = dbContext;
+			this.dbContext = dbContext;
 		}
 
 		[HttpGet]
-		public IActionResult GetAllContacts() => Ok(_dbContext.Contacts.ToList());
+		public IActionResult GetAllContacts() => Ok(dbContext.Contacts.ToList());
 
 		[HttpPost]
 		public IActionResult AddContact(AddContactDto contactDto)
@@ -30,10 +30,24 @@ namespace Contactly.Controllers
 				Favorite = contactDto.Favorite
 			};
 
-			_dbContext.Contacts.Add(domainModelContact);
-			_dbContext.SaveChanges();
+			dbContext.Contacts.Add(domainModelContact);
+			dbContext.SaveChanges();
 
 			return Ok(domainModelContact);
+		}
+
+		[HttpDelete]
+		[Route("{id:guid}")]
+		public IActionResult DeleteContact(Guid id)
+		{
+			var contact = dbContext.Contacts.Find(id);
+			if(contact is not null)
+			{
+				dbContext.Contacts.Remove(contact);
+				dbContext.SaveChanges();
+			}
+			
+			return Ok();
 		}
 	}
 }
